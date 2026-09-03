@@ -8,7 +8,7 @@ export default function Setup() {
           Lege eine <code>.env</code> im Projektordner an (Vorlage: <code>.env.example</code>):
         </p>
         <pre className="code">
-          {'VITE_SUPABASE_URL=https://<projekt>.supabase.co\nVITE_SUPABASE_ANON_KEY=<anon key>'}
+          {'VITE_SUPABASE_URL=https://<projekt>.supabase.co\nVITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_...'}
         </pre>
         <p className="muted">
           Für den GitHub-Pages-Build liegen dieselben Werte als Actions-Secrets im Repository.

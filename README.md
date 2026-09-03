@@ -48,13 +48,15 @@ Tastatur: `←`/`→` spulen, `Leertaste` aufdecken, `H` Tipp, `G` gewusst, `V` 
 
 ```bash
 npm install
-cp .env.example .env    # URL + anon key eintragen
+cp .env.example .env    # Project URL + Publishable key eintragen
 npm run dev
 ```
 
 ### Supabase
 
-1. Projekt anlegen, unter *Settings → API* `URL` und `anon key` kopieren.
+1. Projekt anlegen, unter *Settings → API Keys* die `Project URL` und den
+   `Publishable key` (`sb_publishable_...`) kopieren. Ältere Projekte liefern
+   stattdessen einen `anon key` – dann `VITE_SUPABASE_ANON_KEY` setzen.
 2. `supabase/migrations/0001_init.sql` im SQL-Editor ausführen. Das legt an:
    * `scenes` – Titel und Markdown,
    * `line_stats` – gewusst/vergessen/Serie je Replik und Rolle,
@@ -74,11 +76,12 @@ nach GitHub Pages (*Settings → Pages → Source: GitHub Actions*). Vorher als
 Repository-Secrets hinterlegen:
 
 * `VITE_SUPABASE_URL`
-* `VITE_SUPABASE_ANON_KEY`
+* `VITE_SUPABASE_PUBLISHABLE_KEY`
 
-Der anon key ist öffentlich gedacht – geschützt wird über RLS, nicht über den
-Schlüssel. Trotzdem liegt er nur in `.env` (gitignored) bzw. in den Secrets und
-nicht im Repository.
+Der Publishable key ist für den Browser gedacht – geschützt wird über RLS, nicht
+über den Schlüssel. Trotzdem liegt er nur in `.env` (gitignored) bzw. in den
+Secrets und nicht im Repository. Der *Secret*- bzw. `service_role`-Key gehört
+niemals in diese App: er umgeht RLS.
 
 Läuft die App nicht unter `/Textprobe/`, den Basispfad beim Build setzen:
 `VITE_BASE=/ npm run build`.
