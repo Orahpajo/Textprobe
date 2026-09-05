@@ -79,6 +79,15 @@ export default function Study() {
     setRevealed((prev) => new Set(prev).add(current.item.key))
   }, [current])
 
+  /** Neuer Durchgang: Zeiger an den Anfang, alles wieder verdeckt. */
+  const restart = useCallback((nextMode?: Mode) => {
+    if (nextMode) setMode(nextMode)
+    setCursor(0)
+    setRevealed(new Set())
+    setHint(0)
+    setDone(false)
+  }, [])
+
   const go = useCallback(
     (delta: number) => {
       setDone(false)
@@ -178,7 +187,7 @@ export default function Study() {
     return (
       <Wrap sceneId={id} title={scene.title}>
         <p className="notice">Keine schwierigen Stellen mehr – alles sitzt.</p>
-        <button className="btn primary" onClick={() => setMode('szene')}>
+        <button className="btn primary" onClick={() => restart('szene')}>
           Ganze Szene üben
         </button>
       </Wrap>
@@ -199,12 +208,12 @@ export default function Study() {
       title={`${scene.title} · ${roleId}`}
       actions={
         <div className="segmented">
-          <button className={mode === 'szene' ? 'on' : ''} onClick={() => { setMode('szene'); setCursor(0) }}>
+          <button className={mode === 'szene' ? 'on' : ''} onClick={() => restart('szene')}>
             Szene
           </button>
           <button
             className={mode === 'schwierig' ? 'on' : ''}
-            onClick={() => { setMode('schwierig'); setCursor(0) }}
+            onClick={() => restart('schwierig')}
           >
             Schwierige Stellen
           </button>
@@ -250,10 +259,10 @@ export default function Study() {
             <div className="done">
               <strong>Durch!</strong>
               <div className="row">
-                <button className="btn" onClick={() => { setCursor(0); setDone(false) }}>
+                <button className="btn" onClick={() => restart()}>
                   Von vorn
                 </button>
-                <button className="btn primary" onClick={() => { setMode('schwierig'); setCursor(0); setDone(false) }}>
+                <button className="btn primary" onClick={() => restart('schwierig')}>
                   Schwierige Stellen üben
                 </button>
               </div>
