@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { isOwnLine, parseScene, splitSpeakers, stripMarkup } from './parser'
-import { HINT_STAGES } from './hint'
+import { maskedText, maxHintLevel } from './hint'
 import { difficultyLevel } from './difficulty'
 
 const SZENE = `# Szene 3 – Im Kontor
@@ -82,17 +82,29 @@ describe('stripMarkup', () => {
 describe('Tipp-Stufen', () => {
   const text = 'Gibt es keine Gefängnisse mehr?'
 
-  it('deckt stufenweise mehr auf', () => {
-    expect(HINT_STAGES[0].render(text)).not.toContain('Gibt')
-    expect(HINT_STAGES[1].render(text)).toMatch(/^Gibt /)
-    expect(HINT_STAGES[2].render(text)).toMatch(/^G/)
-    expect(HINT_STAGES[3].render(text)).toContain('keine')
+  it('gibt pro Stufe einen Buchstaben je Wort mehr frei', () => {
+    expect(maskedText(text, 0)).toBe('‧‧‧‧ ‧‧ ‧‧‧‧‧ ‧‧‧‧‧‧‧‧‧‧‧ ‧‧‧‧?')
+    expect(maskedText(text, 1)).toBe('G‧‧‧ e‧ k‧‧‧‧ G‧‧‧‧‧‧‧‧‧‧ m‧‧‧?')
+    expect(maskedText(text, 2)).toBe('Gi‧‧ es ke‧‧‧ Ge‧‧‧‧‧‧‧‧‧ me‧‧?')
   })
 
-  it('behält Wortzahl und Satzzeichen', () => {
-    const masked = HINT_STAGES[0].render(text)
-    expect(masked.split(' ')).toHaveLength(5)
-    expect(masked.endsWith('?')).toBe(true)
+  it('behält Wortzahl und Satzzeichen auf jeder Stufe', () => {
+    for (const level of [0, 1, 3, 99]) {
+      const masked = maskedText(text, level)
+      expect(masked.split(' ')).toHaveLength(5)
+      expect(masked.endsWith('?')).toBe(true)
+    }
+  })
+
+  it('deckt auf der höchsten Stufe alles auf', () => {
+    const max = maxHintLevel(text)
+    expect(max).toBe('Gefängnisse'.length)
+    expect(maskedText(text, max)).toBe(text)
+    expect(maskedText(text, max)).not.toContain('‧')
+  })
+
+  it('kürzere Wörter bleiben vollständig, statt Füllzeichen zu bekommen', () => {
+    expect(maskedText('es', 5)).toBe('es')
   })
 })
 

@@ -5,7 +5,7 @@ import { Inline } from '../components/Markdown'
 import { getScene, type Scene } from '../api/scenes'
 import { loadCursor, loadStats, recordResult, resetProgress, saveCursor } from '../api/progress'
 import { isOwnLine, parseScene, type SceneItem } from '../lib/parser'
-import { HINT_STAGES, MAX_HINT } from '../lib/hint'
+import { maskedText, maxHintLevel } from '../lib/hint'
 import { LEVEL_LABEL, difficultyLevel, difficultyScore, type LineStat } from '../lib/difficulty'
 
 type Mode = 'szene' | 'schwierig'
@@ -57,6 +57,8 @@ export default function Study() {
   }, [id, roleId])
 
   const current = stops[cursor]
+  /** Höchste sinnvolle Tipp-Stufe: ab hier liegt das längste Wort offen. */
+  const maxHint = useMemo(() => (current ? maxHintLevel(current.item.text) : 0), [current])
 
   // Position merken, damit man später weitermachen kann (nur im Szenenmodus).
   useEffect(() => {
@@ -156,7 +158,7 @@ export default function Study() {
           if (!isRevealed) reveal()
           break
         case 'h':
-          setHint((h) => Math.min(MAX_HINT, h + 1))
+          setHint((h) => Math.min(maxHint, h + 1))
           break
         case 'g':
           rate(true)
@@ -168,7 +170,7 @@ export default function Study() {
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [go, rate, reveal, isRevealed])
+  }, [go, rate, reveal, isRevealed, maxHint])
 
   if (error) return <Wrap sceneId={id}><p className="error">{error}</p></Wrap>
   if (!scene || !parsed) return <Wrap sceneId={id}><p className="muted">Lade …</p></Wrap>
@@ -246,7 +248,7 @@ export default function Study() {
                   {shown ? (
                     <Inline text={item.text} />
                   ) : (
-                    <p className="masked">{HINT_STAGES[isCurrent ? hint : 0].render(item.text)}</p>
+                    <p className="masked">{maskedText(item.text, isCurrent ? hint : 0)}</p>
                   )}
                 </div>
               </div>
@@ -291,10 +293,10 @@ export default function Study() {
                 <div className="row">
                   <button
                     className="btn block"
-                    disabled={hint >= MAX_HINT}
-                    onClick={() => setHint((h) => Math.min(MAX_HINT, h + 1))}
+                    disabled={hint >= maxHint}
+                    onClick={() => setHint((h) => Math.min(maxHint, h + 1))}
                   >
-                    Tipp {hint > 0 && `(${HINT_STAGES[hint].label})`}
+                    Tipp {hint > 0 && `(×${hint})`}
                   </button>
                   <button className="btn primary block" onClick={reveal}>
                     Aufdecken

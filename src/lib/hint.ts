@@ -1,18 +1,21 @@
 import { stripMarkup } from './parser'
 
-export interface HintStage {
-  label: string
-  /** Maskierter Text für diese Stufe */
-  render(text: string): string
-}
-
 const MASK = '‧'
 
+function words(text: string): string[] {
+  return stripMarkup(text).split(/\s+/).filter(Boolean)
+}
+
+function letters(word: string): number {
+  return [...word].filter((ch) => /[\p{L}\p{N}]/u.test(ch)).length
+}
+
+/** Gibt die ersten `revealed` Buchstaben eines Wortes frei; Satzzeichen bleiben sichtbar. */
 function maskWord(word: string, revealed: number): string {
   let shown = 0
   return [...word]
     .map((ch) => {
-      if (!/[\p{L}\p{N}]/u.test(ch)) return ch // Satzzeichen bleiben sichtbar
+      if (!/[\p{L}\p{N}]/u.test(ch)) return ch
       if (shown < revealed) {
         shown++
         return ch
@@ -22,34 +25,18 @@ function maskWord(word: string, revealed: number): string {
     .join('')
 }
 
-function words(text: string): string[] {
-  return stripMarkup(text).split(/\s+/).filter(Boolean)
-}
-
-/** Erste `n` Wörter im Klartext, der Rest nur mit Anfangsbuchstaben. */
-function partial(text: string, n: number): string {
+/**
+ * Verdeckte Replik auf Tipp-Stufe `level`: Jede Stufe gibt pro Wort einen
+ * Buchstaben mehr frei – Stufe 0 verdeckt alles, Stufe 1 zeigt die
+ * Anfangsbuchstaben.
+ */
+export function maskedText(text: string, level: number): string {
   return words(text)
-    .map((w, i) => (i < n ? w : maskWord(w, 1)))
+    .map((word) => maskWord(word, Math.max(0, level)))
     .join(' ')
 }
 
-export const HINT_STAGES: HintStage[] = [
-  {
-    label: 'Verdeckt',
-    render: (text) => words(text).map((w) => maskWord(w, 0)).join(' '),
-  },
-  {
-    label: 'Erstes Wort',
-    render: (text) => partial(text, 1),
-  },
-  {
-    label: 'Anfangsbuchstaben',
-    render: (text) => words(text).map((w) => maskWord(w, 1)).join(' '),
-  },
-  {
-    label: 'Erste Hälfte',
-    render: (text) => partial(text, Math.ceil(words(text).length / 2)),
-  },
-]
-
-export const MAX_HINT = HINT_STAGES.length - 1
+/** Ab dieser Stufe ist das längste Wort vollständig aufgedeckt. */
+export function maxHintLevel(text: string): number {
+  return words(text).reduce((max, word) => Math.max(max, letters(word)), 0)
+}
