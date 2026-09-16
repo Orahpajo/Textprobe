@@ -199,7 +199,7 @@ export default function Study() {
   const visible: SceneItem[] =
     mode === 'szene'
       ? items.slice(0, (current?.i ?? 0) + 1)
-      : items.slice(Math.max(0, (current?.i ?? 0) - 2), (current?.i ?? 0) + 1)
+      : items.slice(cueStart(items, current?.i ?? 0), (current?.i ?? 0) + 1)
 
   const stat = current ? stats.get(current.item.key) : undefined
   const level = difficultyLevel(stat)
@@ -240,7 +240,9 @@ export default function Study() {
               )
 
             const own = isOwnLine(item, roleId)
-            const shown = !own || revealed.has(item.key)
+            // Verdeckt wird nur die Replik, die gerade abgefragt wird; alles
+            // darüber ist Kontext und liefert das Stichwort zum Einsetzen.
+            const shown = !own || !isCurrent || revealed.has(item.key)
             return (
               <div key={item.key} className={`line${own ? ' own' : ''}${isCurrent ? ' current' : ''}`}>
                 <span className="speaker">{item.speaker}:</span>
@@ -350,6 +352,19 @@ export default function Study() {
       </div>
     </Wrap>
   )
+}
+
+/**
+ * Startindex des Kontexts im Drill-Modus: zurück bis zur nächsten gesprochenen
+ * Replik, damit das Stichwort sichtbar ist (höchstens vier Absätze).
+ */
+function cueStart(items: SceneItem[], index: number, maxBack = 4): number {
+  let start = index
+  for (let back = 0; back < maxBack && start > 0; back++) {
+    start--
+    if (items[start].kind === 'dialogue') break
+  }
+  return start
 }
 
 function Wrap({
