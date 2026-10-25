@@ -66,6 +66,28 @@ export async function recordResult(
   return toStat(data as StatRow)
 }
 
+/**
+ * Löscht Fortschritt zu Repliken, die es nach einer Textänderung nicht mehr
+ * gibt. Alles, was unverändert blieb, behält seinen Schlüssel und bleibt
+ * damit erhalten. Gibt die Zahl der gelöschten Einträge zurück.
+ */
+export async function pruneStats(sceneId: string, keys: Set<string>): Promise<number> {
+  const { data, error } = await supabase
+    .from('line_stats')
+    .select('id, line_key')
+    .eq('scene_id', sceneId)
+  if (error) throw error
+
+  const orphans = (data ?? [])
+    .filter((row) => !keys.has((row as { line_key: string }).line_key))
+    .map((row) => (row as { id: string }).id)
+  if (orphans.length === 0) return 0
+
+  const { error: deleteError } = await supabase.from('line_stats').delete().in('id', orphans)
+  if (deleteError) throw deleteError
+  return orphans.length
+}
+
 export async function resetProgress(sceneId: string, roleId: string) {
   const { error } = await supabase
     .from('line_stats')

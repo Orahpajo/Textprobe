@@ -161,3 +161,11 @@ textarea.input { resize: vertical; line-height: 1.5; }
 .counter { min-width: 56px; text-align: right; }
 .hints { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
 .done { display: grid; gap: 10px; justify-items: start; }
+
+/* ------------------------------------------------ Bearbeiten: Auswirkung */
+.impact { list-style: none; padding: 0; margin: 0 0 16px; display: grid; gap: 8px; }
+.impact li { display: grid; grid-template-columns: auto 1fr; gap: 8px; align-items: baseline; }
+.impact .badge { flex: none; }
+.line-list { margin: 8px 0 0; padding-left: 18px; display: grid; gap: 6px; }
+.line-list li { font-size: 14px; }
+.line-list.removed li { text-decoration: line-through; color: var(--muted); }

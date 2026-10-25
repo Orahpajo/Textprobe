@@ -30,7 +30,15 @@ export default function SceneView() {
   if (!scene || !parsed) return <Layout back={{ to: '/', label: 'Szenen' }}><p className="muted">Lade …</p></Layout>
 
   return (
-    <Layout back={{ to: '/', label: 'Szenen' }} title={scene.title}>
+    <Layout
+      back={{ to: '/', label: 'Szenen' }}
+      title={scene.title}
+      actions={
+        <Link className="btn ghost" to={`/szene/${scene.id}/bearbeiten`}>
+          Text bearbeiten
+        </Link>
+      }
+    >
       <h1 className="page-title">Wessen Text willst du lernen?</h1>
       <ul className="role-cards">
         {parsed.roles.map((role) => {

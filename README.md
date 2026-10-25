@@ -41,6 +41,10 @@ Es gilt das Format des `theater-scene-epub`-Skills:
    den eigenen Repliken vor und zurück. Die Position wird gespeichert.
 5. **Schwierige Stellen** – eigener Modus, der nur die wackeligen und noch
    ungeübten Repliken abfragt, die schwersten zuerst.
+6. **Text bearbeiten** – das Markdown einer gespeicherten Szene ändern. Vor dem
+   Speichern zeigt die Seite, was die Änderung mit dem Lernstand macht:
+   unveränderte Repliken behalten ihn, geänderte und neue starten bei null,
+   entfallene werden gelöscht.
 
 Tastatur: `←`/`→` spulen, `Leertaste` aufdecken, `H` Tipp, `G` gewusst, `V` vergessen.
 
@@ -68,6 +72,9 @@ npm run dev
 
 Der Lernfortschritt hängt an einem Hash über Sprecher + Text der Replik, nicht
 an der Zeilennummer – eine umsortierte oder ergänzte Szene verliert ihn also nicht.
+Genau das trägt auch das Bearbeiten: Wer einen Tippfehler in einer Replik
+korrigiert, setzt nur diese eine Replik zurück. Wird dagegen ein Sprechername
+geändert, zählt das für alle seine Repliken als neuer Text.
 
 ### Deployment auf GitHub Pages
 
